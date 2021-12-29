@@ -38,12 +38,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
+public class PendingAdapter extends RecyclerView.Adapter<PendingAdapter.ViewHolder> {
     List<Student> students;
     public static AppCompatActivity activity;
-    public TaskAdapter(List<Student> students, AppCompatActivity activity) {
+    public PendingAdapter(List<Student> students, AppCompatActivity activity) {
         this.students = students;
-        TaskAdapter.activity = activity;
+        PendingAdapter.activity = activity;
     }
 
     public void setStudents(List<Student> students) {
@@ -78,8 +78,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
             chkAction = itemView.findViewById(R.id.chkAction);
             btnEdit = itemView.findViewById(R.id.btnEdit);
             btnDelete = itemView.findViewById(R.id.btnDelete);
-            txtPending = TaskAdapter.activity.findViewById(R.id.txtPending);
-            txtCompleted = TaskAdapter.activity.findViewById(R.id.txtCompleted);
+            txtPending = PendingAdapter.activity.findViewById(R.id.txtPending);
+            txtCompleted = PendingAdapter.activity.findViewById(R.id.txtCompleted);
             txtCompleted.setText(String.valueOf(Init.done) + " completed");
             txtPending.setText(String.valueOf(Init.pending) + " pending");
         }
@@ -143,7 +143,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
                 Init.student = student;
                 Intent intent = new Intent(view.getContext(), EditTaskActivity.class);
                 view.getContext().startActivity(intent);
-                TaskAdapter.activity.finish();
+                PendingAdapter.activity.finish();
             });
             btnDelete.setOnClickListener(view -> {
                 DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
@@ -164,7 +164,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
                                     progress.dismiss();
                                     Intent intent = new Intent(view.getContext(), MainActivity.class);
                                     view.getContext().startActivity(intent);
-                                    TaskAdapter.activity.finish();
+                                    PendingAdapter.activity.finish();
                                 }
                             },
                                     new Response.ErrorListener() {

@@ -8,10 +8,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +26,8 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.agenda.adapters.TaskAdapter;
 import com.example.agenda.constants.Init;
+import com.example.agenda.fragments.DoneFragment;
+import com.example.agenda.fragments.PendingFragment;
 import com.example.agenda.models.Student;
 
 import org.json.JSONArray;
@@ -42,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences preferences;
     SharedPreferences.Editor editor;
     private static final String JSON_URL = "https://empy-api.herokuapp.com/api/v1/contacts";
+    FrameLayout frameLayout;
+    Button btnDone, btnPending;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         preferences = getSharedPreferences("login", Context.MODE_PRIVATE);
         editor = preferences.edit();
 
-        if (preferences.getString("email", "").isEmpty()) {
+        if (!preferences.getBoolean("loggedIn", false)) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
             finish();
@@ -80,12 +87,21 @@ public class MainActivity extends AppCompatActivity {
         btnLogout = findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(view -> {
             editor.clear();
+            editor.remove("loggedIn");
+            editor.remove("id");
             editor.apply();
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
             finish();
         });
 
+        frameLayout = findViewById(R.id.frameLayout);
+
+        btnDone = findViewById(R.id.btnDone);
+        btnPending = findViewById(R.id.btnPending);
+
+        btnDone.setOnClickListener(view -> loadFragments(btnDone));
+        btnPending.setOnClickListener(view -> loadFragments(btnPending));
     }
 
     public void loadStudents () {
@@ -146,5 +162,37 @@ public class MainActivity extends AppCompatActivity {
                 });
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(stringRequest);
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    public void loadFragments(Button btn) {
+        Fragment fragment = null;
+        List<Student> list = new ArrayList<>();
+       switch (btn.getId()) {
+           case R.id.btnDone:
+               for(Student student : studentList) {
+                   if (student.status) {
+                       list.add(student);
+                   }
+               }
+               fragment = new DoneFragment(list);
+               break;
+           case R.id.btnPending:
+               for(Student student : studentList) {
+                   if (!student.status) {
+                       list.add(student);
+                   }
+               }
+               fragment = new PendingFragment(list);
+               break;
+       }
+
+        if (fragment == null || fragment.isAdded()) {
+            return;
+        }
+
+        frameLayout.removeAllViews();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.frameLayout, fragment, fragment.getClass().getSimpleName()).addToBackStack(null).commit();
     }
 }
